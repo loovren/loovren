@@ -1,173 +1,79 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
-
+<html lang="ar">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>loovren</title>
-
+<title>مونوبولي أنمي - تجربة أولية</title>
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial;
-}
-
-body{
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-overflow:hidden;
-background:black;
-}
-
-/* الخلفية */
-
-.bg{
-position:fixed;
-width:100%;
-height:100%;
-background:url("bg.png") center/cover no-repeat;
-filter:brightness(0.5);
-animation:bgmove 25s infinite alternate ease-in-out;
-z-index:-2;
-}
-
-@keyframes bgmove{
-0%{transform:scale(1);}
-100%{transform:scale(1.15);}
-}
-
-/* النجوم */
-
-.stars{
-position:fixed;
-width:100%;
-height:100%;
-background:url("https://www.transparenttextures.com/patterns/stardust.png");
-animation:stars 60s linear infinite;
-z-index:-1;
-opacity:0.5;
-}
-
-@keyframes stars{
-from{background-position:0 0;}
-to{background-position:1000px 1000px;}
-}
-
-/* الصندوق */
-
-.container{
-text-align:center;
-background:rgba(0,0,0,0.55);
-padding:40px;
-border-radius:20px;
-backdrop-filter:blur(10px);
-width:340px;
-}
-
-/* الشعار */
-
-.logo{
-width:120px;
-margin-bottom:15px;
-animation:logoFloat 4s ease-in-out infinite;
-}
-
-@keyframes logoFloat{
-0%,100%{transform:translateY(0);}
-50%{transform:translateY(-12px);}
-}
-
-.name{
-font-size:30px;
-margin-bottom:5px;
-}
-
-.bio{
-opacity:0.9;
-margin-bottom:25px;
-}
-
-/* الأزرار */
-
-.links a{
-display:block;
-text-decoration:none;
-background:#2563eb;
-margin:12px 0;
-padding:14px;
-border-radius:12px;
-color:white;
-font-size:18px;
-opacity:0;
-transform:translateY(20px);
-animation:show 1s forwards;
-}
-
-.links a:nth-child(1){animation-delay:0.3s;}
-.links a:nth-child(2){animation-delay:0.6s;}
-.links a:nth-child(3){animation-delay:0.9s;}
-
-@keyframes show{
-to{
-opacity:1;
-transform:translateY(0);
-}
-}
-
-.links a:hover{
-transform:scale(1.08);
-background:#1d4ed8;
-box-shadow:0 0 15px #2563eb;
-}
-
-.links a:active{
-transform:scale(0.92);
-}
-
+  body { font-family: Arial, sans-serif; text-align: center; background: #f0f0f0; }
+  #board { display: grid; grid-template-columns: repeat(5, 100px); grid-gap: 5px; margin: 20px auto; }
+  .cell { width: 100px; height: 100px; background: #fff; border: 1px solid #333; display: flex; align-items: center; justify-content: center; position: relative; }
+  .player { width: 20px; height: 20px; border-radius: 50%; position: absolute; top: 5px; left: 5px; }
+  #controls { margin-top: 20px; }
 </style>
-
 </head>
-
 <body>
 
-<div class="bg"></div>
-<div class="stars"></div>
+<h1>مونوبولي أنمي - تجربة أولية</h1>
 
-<audio autoplay loop>
-<source src="sound.mp3" type="audio/mpeg">
-</audio>
+<div id="board"></div>
 
-<div class="container">
-
-<img src="bg.png" class="logo">
-
-<div class="name">loovren</div>
-<div class="bio">حساباتي</div>
-
-<div class="links">
-
-<a href="https://www.instagram.com/loovren_/" target="_blank">
-Instagram
-</a>
-
-<a href="https://x.com/Loovren_" target="_blank">
-X
-</a>
-
-<a href="https://www.twitch.tv/" target="_blank">
-Twitch
-</a>
-
+<div id="controls">
+  <p>الدور الحالي: <span id="currentPlayer">1</span></p>
+  <button onclick="rollDice()">رمي النرد</button>
+  <p>النرد: <span id="diceResult">-</span></p>
 </div>
 
-</div>
+<script>
+// إعداد اللوحة
+const board = document.getElementById("board");
+const totalCells = 20; // لوحة مصغرة
+for (let i = 0; i < totalCells; i++) {
+  const cell = document.createElement("div");
+  cell.className = "cell";
+  cell.textContent = "مربع " + (i+1);
+  board.appendChild(cell);
+}
+
+// إعداد اللاعبين
+const players = [
+  {name: "أنمي 1", color: "red", position: 0},
+  {name: "أنمي 2", color: "blue", position: 0}
+];
+
+players.forEach((p, index) => {
+  const el = document.createElement("div");
+  el.className = "player";
+  el.style.backgroundColor = p.color;
+  el.id = "player"+index;
+  board.children[0].appendChild(el);
+});
+
+let currentPlayerIndex = 0;
+
+// وظيفة رمي النرد والتحريك
+function rollDice() {
+  const dice = Math.floor(Math.random() * 6) + 1;
+  document.getElementById("diceResult").textContent = dice;
+  
+  // تحريك اللاعب
+  const player = players[currentPlayerIndex];
+  const oldPos = player.position;
+  player.position = (player.position + dice) % totalCells;
+  
+  // إزالة عنصر اللاعب من المربع القديم
+  const oldCell = board.children[oldPos];
+  const playerEl = document.getElementById("player"+currentPlayerIndex);
+  oldCell.removeChild(playerEl);
+  
+  // إضافة عنصر اللاعب إلى المربع الجديد
+  const newCell = board.children[player.position];
+  newCell.appendChild(playerEl);
+  
+  // تغيير الدور
+  currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  document.getElementById("currentPlayer").textContent = currentPlayerIndex + 1;
+}
+</script>
 
 </body>
 </html>
